@@ -1,1 +1,52 @@
-// TODO
+.container {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.content {
+  a {
+    display: block;
+    margin-top: 20px;
+
+    & + a {
+      margin-top: 48px;
+    }
+
+    h1 {
+      color: var(--heading);
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      color: var(--body);
+      margin-bottom: 24px;
+    }
+
+    div {
+      display: flex;
+      align-items: center;
+    }
+
+    span + img {
+      margin-left: 24px;
+    }
+
+    span {
+      color: var(--info);
+      line-height: 17px;
+      font-size: 14px;
+      margin-left: 8px;
+    }
+  }
+
+  button {
+    margin-top: 64px;
+    background: none;
+    border-width: 0;
+
+    color: var(--highlight);
+    font-weight: 600;
+    font-size: 18px;
+  }
+}
