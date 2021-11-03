@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { ReactElement, useState } from 'react'
 import { GetStaticProps } from 'next'
 import Prismic from '@prismicio/client'
+import { FiCalendar, FiUser } from 'react-icons/fi'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import Head from 'next/head'
@@ -27,13 +28,13 @@ interface PostPagination {
 
 interface HomeProps {
   postsPagination: PostPagination
+  preview: boolean
 }
 
-interface PostsProps {
-  posts: Post[]
-}
-
-export default function Home({ postsPagination }: HomeProps): JSX.Element {
+export default function Home({
+  postsPagination,
+  preview,
+}: HomeProps): ReactElement {
   const formattedPost = postsPagination.results.map(post => {
     return {
       ...post,
@@ -49,16 +50,51 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
 
   const [posts, setPosts] = useState<Post[]>(formattedPost)
   const [nextPage, setNextPage] = useState(postsPagination.next_page)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  async function handleLoadMorePages(): Promise<void> {
+    if (currentPage !== 1 && nextPage === null) {
+      return
+    }
+
+    const postsResults = await fetch(`${nextPage}`).then(response =>
+      response.json()
+    )
+
+    setNextPage(postsResults.next_page)
+    setCurrentPage(postsResults.page)
+
+    const newPosts = postsResults.results.map(post => {
+      return {
+        uid: post.uid,
+        first_publication_date: format(
+          new Date(post.first_publication_date),
+          'dd MMM yyyy',
+          {
+            locale: ptBR,
+          }
+        ),
+        data: {
+          title: post.data.title,
+          subtitle: post.data.subtitle,
+          author: post.data.author,
+        },
+      }
+    })
+
+    setPosts([...posts, ...newPosts])
+  }
+
   return (
     <>
       <Head>
-        <title>Posts | Space Traveling</title>
+        <title>Home | Space Traveling</title>
       </Head>
 
-      <main className={styles.container}>
+      <main className={commonStyles.container}>
         <div className={styles.content}>
           {posts.map(post => (
-            <Link href={`/post/${post.uid}`}>
+            <Link href={`/post/${post.uid}`} key={post.uid}>
               <a>
                 <h1>{post.data.title}</h1>
                 <h2>{post.data.subtitle}</h2>
@@ -73,7 +109,9 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
             </Link>
           ))}
 
-          <button>Carregue mais posts</button>
+          <button type='button' onClick={handleLoadMorePages}>
+            Carregue mais posts
+          </button>
         </div>
       </main>
     </>
@@ -84,7 +122,7 @@ export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient()
 
   const response = await prismic.query(
-    [Prismic.predicates.at('document.type', 'posts')],
+    [Prismic.Predicates.at('document.type', 'posts')],
     {
       pageSize: 2,
     }
@@ -92,7 +130,7 @@ export const getStaticProps: GetStaticProps = async () => {
 
   const posts = response.results.map(post => {
     return {
-      slug: post.uid,
+      uid: post.uid,
       first_publication_date: post.first_publication_date,
       data: {
         title: post.data.title,

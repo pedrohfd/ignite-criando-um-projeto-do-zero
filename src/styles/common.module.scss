@@ -1,11 +1,19 @@
-@media (max-width: 1080px) {
-  html {
-    font-size: 93.75%;
-  }
+.container {
+  max-width: 700px;
+  margin: 4rem auto;
 }
 
-@media (max-width: 720px) {
-  html {
-    font-size: 87.5%;
-  }
+.preview {
+  display: block;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+  margin-top: 5.5rem;
+  background: var(--heading);
+  color: var(--background);
+  text-align: center;
+  border-radius: 4px;
+  padding: 1rem;
+  font-weight: 600;
+  font-size: 1.125rem;
 }
